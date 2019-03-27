@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 import sys
 import numpy as np
@@ -5,20 +7,18 @@ import pandas as pd
 from functools import reduce
 
 
-def get_word_embedding(word_embedding_file, header=False, seps=('\t', '\t')):
+def get_word_embedding(word_embedding_file, header=False, seps=('\t', ',')):
     """ Original Full Word Embedding，用于从中选择出词汇表word2index中的word及其vector，或构建Embedding Layer """
     word_embedding = {}
     with open(word_embedding_file, 'r', encoding='utf-8') as fr:
         if header:
             fr.readline()                        # Drop line 1
         for line in fr:
-            try:
-                values = line.strip().split(seps[0])
+            values = line.strip().split(seps[0])
+            if len(values) >= 2:
                 word = values[0]
                 vector = values[1:] if seps[0] == seps[1] else values[1].split(seps[1])
                 word_embedding[word] = np.asarray(vector, dtype='float32')
-            except ValueError as e:
-                pass
     return word_embedding
 
 
@@ -40,9 +40,9 @@ def get_word2index(corpus, level='word', sep=None):
                 word2num[obj] += 1
             else:
                 word2num[obj] = 1
-    word_sorted = sorted(word2num, key=word2num.get, reverse=True)           # 按character/word频率倒序排列
-    word_list = word_sorted if ' ' in word_sorted else [' '] + word_sorted   # 空格是否加入vocab？
-    word2index = {word: ind for (ind, word) in enumerate(word_list)}  # character/word词汇表：排列rank作为character/word的index   
+    word_sorted = sorted(word2num, key=word2num.get, reverse=True)          # 按character/word频率倒序排列
+    word_list = word_sorted if ' ' in word_sorted else [' '] + word_sorted  # 空格是否加入vocab？ 确保下面word2index中的index从0开始
+    word2index = {word: ind for (ind, word) in enumerate(word_list)}        # character/word词汇表：排列rank作为character/word的index   
     return word2index
 
 
