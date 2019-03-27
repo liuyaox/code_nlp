@@ -1,6 +1,8 @@
 
 
+import nltk
 
+input_str = 'ddAdhxSlJk238sXkj'
 
 # 1. Ð¡Ð´»¯
 input_str = input_str.lower()
