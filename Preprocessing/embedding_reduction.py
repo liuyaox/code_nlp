@@ -59,8 +59,10 @@ def embedding_reduce(word2vector, method='all', n_components=50, d=7, ds=(7, 7))
         arr_reduced = ppa_pca(arr_vector, n_components, d=d)
     elif method == 'ppapcappa':
         arr_reduced = ppa_pca_ppa(arr_vector, n_components, ds=ds)
+    elif method == 'truncation':
+        arr_reduced = {key: val[:n_components] for (key, val) in word2vector.items()}
     else:
-        print('Invalid method! Valid methods are pca, ppa, pcappa, ppapca and ppapcappa.')
+        print('Invalid method! Valid methods are pca, ppa, pcappa, ppapca, ppapcappa and truncation.')
     return dict(zip(arr_word, arr_reduced))
     
 

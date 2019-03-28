@@ -5,6 +5,7 @@ import sys
 import numpy as np
 import pandas as pd
 from functools import reduce
+from collections import Iterable
 
 
 def get_word_embedding(word_embedding_file, header=False, seps=('\t', ',')):
@@ -107,12 +108,13 @@ def get_similar_words(word0, word2vector, sim_func=similarity_cos, thresh=0.7):
     return sorted(res, key=lambda x: x[1], reverse=True)
 
 
-def word2vector_persist(word2vector, filename, seps=['\t', ',']):
-    """ word_to_vector持久化为文件 """
+def dict_persist(dic, filename, seps=['\t', ',']):
+    """ 字典持久化为文件，每行一个<key, val>对 """
     with open(filename, 'w', encoding='utf-8') as fw:
-        for (word, vector) in word2vector.items():
-            line = str(word) + seps[0] + seps[1].join([str(x) for x in vector])
-            fw.write(line + '\n')
+        for (key, val) in dic.items():
+            if not isinstance(val, str) and isinstance(val, Iterable):
+                val = seps[1].join([str(x) for x in val])
+            fw.write(str(key) + seps[0] + val + '\n')
 
 
 
