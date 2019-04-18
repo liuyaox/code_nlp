@@ -13,31 +13,40 @@ from keras.initializers import Constant
 
 
 
-def get_emb_layer(initializer='constant', vocabulary=None, word2vec=None, word2vec_backup=None, emb_dim=64, vocab_len=None, name=None):
-    """ Create Embedding Layer Using Random Initialization or Pretrained Word Embeddings """
+def get_embedding_layer(initializer='constant', word2index=None, word2vector=None, word_embedding_spare=None, 
+                  embedding_dim=64, vocab_len=None, trainable=False, name=None):
+    """
+    Create Embedding Layer Using Random Initialization or Pretrained Word Embeddings 
+    word2vector也可以是word_embedding，两者等价，因为word2vector来自于word_embedding，但首选轻便的word2vector
+    word_embedding_spare是备用word_embedding，不同于上面word_embedding
+    """
+    
     if vocab_len is None:
-        vocab_len = len(vocabulary)
-    # Using random initialization
-    if initializer != 'constant':
-        emb_layer = Embedding(vocab_len, emb_dim, embeddings_initializer=initializer, name=name, trainable=True) # 一般取uniform
-    # Using pre-trained word embeddings
-    elif word2vec is not None and vocabulary is not None:
-        emb_matrix = np.zeros((vocab_len, emb_dim))
-        for word, index in vocabulary.items():
+        vocab_len = len(word2index)
+        
+    if initializer != 'constant':    # 随机初始化的Embedding  一般取initializer='uniform'
+        embedding_layer = Embedding(vocab_len, embedding_dim, embeddings_initializer=initializer, trainable=True, name=name)
+        
+    elif word2index is not None and word2vector is not None:
+        emb_matrix = np.zeros((vocab_len, embedding_dim))
+        
+        for word, index in word2index.items():
             if index < vocab_len:
-                if word in word2vec:                    # 首选当前word2vec
-                    vector = word2vec.get(word)
-                elif word in word2vec_backup:           # 若当前word2vec不存在该word，则使用备用word2vec
-                    vector = word2vec_backup.get(word)[:emb_dim]
-                else:                                   # 若备用word2vec也不存在该word，则取所有character vector的均值
-                    vectors = [word2vec_backup.get(x, np.zeros(emb_dim))[:emb_dim] for x in list(word)]
+                if word in word2vector:                     # 首选当前word2vector
+                    vector = word2vector.get(word)
+                elif word in word_embedding_spare:          # 若当前word2vector不存在该word，则使用备用word_embedding
+                    vector = word_embedding_spare.get(word)[:embedding_dim]
+                else:                                       # 若备用word_embedding也不存在该word，则取所有character vector的均值
+                    vectors = [word_embedding_spare.get(x, np.zeros(embedding_dim))[:embedding_dim] for x in list(word)]
                     vector = reduce(lambda x, y: x + y, vectors) / len(vectors)
                 if vector is not None:
                     emb_matrix[index, :] = vector
-        emb_layer = Embedding(vocab_len, emb_dim, embeddings_initializer=Constant(emb_matrix), name=name, trainable=False)
+                    
+        embedding_layer = Embedding(vocab_len, embedding_dim, embeddings_initializer=Constant(emb_matrix), trainable=trainable, name=name)
+        
     else:
-        print('ERROR! No vocabulary or word2vec or word2vec_backup!')
-    return emb_layer
+        raise ValueError('ERROR, Guy! No word2index or word2vector or word_embedding_spare !')
+    return embedding_layer
 
 
 

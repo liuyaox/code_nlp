@@ -51,7 +51,7 @@ def get_word2vector(word2index=None, word_embedding=None):
     """ 生成词汇表中的word及其vector，基于Original Full Embedding和词汇表word2index的结合 """
     word2vector = {}
     emb_dim = len(word_embedding.get('a'))
-    for word, index in word2index.items():
+    for word in word2index:
         if word in word_embedding:
             vector = word_embedding.get(word)
         else:
