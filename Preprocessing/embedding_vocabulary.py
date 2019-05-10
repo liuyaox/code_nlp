@@ -8,7 +8,7 @@ from functools import reduce
 from collections import Iterable
 
 
-def get_word_embedding(word_embedding_file, header=False, seps=('\t', ',')):
+def get_word_embedding(word_embedding_file, seps=('\t', ','), header=False):
     """ Original Full Word Embedding，用于从中选择出词汇表word2index中的word及其vector，或构建Embedding Layer """
     word_embedding = {}
     with open(word_embedding_file, 'r', encoding='utf-8') as fr:
@@ -115,6 +115,15 @@ def dict_persist(dic, filename, seps=['\t', ',']):
             if not isinstance(val, str) and isinstance(val, Iterable):
                 val = seps[1].join([str(x) for x in val])
             fw.write(str(key) + seps[0] + val + '\n')
+
+
+def seq_to_vector(seq, vocabulary, max_token_len, char_flag=False):
+    """基于词汇表vocabulary，把seq转化为向量"""
+    if isinstance(seq, str) or isinstance(seq, int) or isinstance(seq, float):
+		tokens = list(str(seq)) if char_flag else str(seq).split()
+    seq_vec = [vocabulary.get(token, 0) for token in tokens] 	# tokens中的各个token转化为对应的各个index
+    paddings = [0] * (max_token_len - len(seq_vec))         	# 小于向量长度的部分用0来padding
+    return paddings + seq_vec
 
 
 
