@@ -27,6 +27,7 @@ def get_word2index(corpus, level='word', sep=None):
     """
     词汇表：支持character和word-level，以及两者的汇总
     统计corpus中character/word频率并倒序排序获得index，构建词汇字典：<character/word, index> 后续会使用index来表示character/word
+    其实也可不排序，直接随便赋给每个character/word一个index，只要保证唯一而固定即可~
     """
     word2num = {}
     for line in corpus:

@@ -49,7 +49,8 @@ def get_embedding_layer(initializer='constant', word2index=None, word2vector=Non
         embedding_layer = Embedding(vocab_len, embedding_dim, embeddings_initializer=initializer, trainable=True, name=name)
         
     elif word2index is not None and word2vector is not None:
-        emb_matrix = np.zeros((vocab_len, embedding_dim))
+        # emb_matrix = np.zeros((vocab_len, embedding_dim))                         # 全零初始化，或随机初始化
+        emb_matrix = np.random.uniform(-0.01, 0.01, (vocab_len, embedding_dim))     # 随机初始化，而非全零初始化
         
         for word, index in word2index.items():
             if index < vocab_len:
@@ -57,8 +58,8 @@ def get_embedding_layer(initializer='constant', word2index=None, word2vector=Non
                     vector = word2vector.get(word)
                 elif word in word_embedding_spare:          # 若当前word2vector不存在该word，则使用备用word_embedding
                     vector = word_embedding_spare.get(word)[:embedding_dim]
-                else:                                       # 若备用word_embedding也不存在该word，则取所有character vector的均值
-                    vectors = [word_embedding_spare.get(x, np.zeros(embedding_dim))[:embedding_dim] for x in list(word)]
+                else:                                       # 若备用word_embedding也不存在该word，则取所有character vector截断后的均值
+                    vectors = [word_embedding_spare.get(x, np.random.uniform(-0.01, 0.01, (embedding_dim)))[:embedding_dim] for x in list(word)]
                     vector = reduce(lambda x, y: x + y, vectors) / len(vectors)
                 if vector is not None:
                     emb_matrix[index, :] = vector

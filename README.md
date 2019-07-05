@@ -1,4 +1,5 @@
-# ml_tools
+# NLP Tools
+
 Common and useful tools for machine learning
 
 
@@ -6,11 +7,6 @@ Common and useful tools for machine learning
 
 ### Library/Framework
 
-- [pytext: A natural language modeling framework based on PyTorch](https://github.com/facebookresearch/pytext)
+Please go to <https://github.com/liuyaox/roadmap_nlp/blob/master/02-Corpus_Data_and_Tool.md#23-tool>
 
-    **Documentation**: <https://pytext.readthedocs.io/en/master/>
-
-- [torchtext: Data loaders and abstractions for text and NLP](https://github.com/pytorch/text)
-
-    **Documentation**: <https://torchtext.readthedocs.io/en/latest/index.html>
 
