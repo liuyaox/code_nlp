@@ -6,10 +6,25 @@ import numpy as np
 import pandas as pd
 from functools import reduce
 from collections import Iterable
+from gensim.models import Word2Vec
+
+
+class CorpusGenerator(object):
+    """使用 gensim 生成 Word2Vec 所需的语料 Generator，由文件直接生成，要求文件每行事先完成分词或分字，支持 word-level 和 char-level"""
+    def __init__(self, corpus_file, filter_set=[], sep=' '):
+        self.corpus_file = corpus_file
+        self.filter_set = filter_set
+        self.sep = sep
+
+    def __iter__(self):
+        for line in open(self.corpus_file):
+            # 一个句子由词或字列表表示，形如：['颜色', '很', '漂亮'] 或 ['颜', '色', '很', '漂', '亮']，过滤指定词或字(如停用词等)
+            yield [x for x in line.strip().split(self.sep) if x not in self.filter_set]
+
 
 
 def get_word_embedding(word_embedding_file, seps=('\t', ','), header=False):
-    """ Original Full Word Embedding，用于从中选择出词汇表word2index中的word及其vector，或构建Embedding Layer """
+    """ Original Full Word Embedding，用于从中选择出词汇表 word2index 中的 word 及其 vector，或构建 Embedding Layer """
     word_embedding = {}
     with open(word_embedding_file, 'r', encoding='utf-8') as fr:
         if header:
@@ -25,9 +40,10 @@ def get_word_embedding(word_embedding_file, seps=('\t', ','), header=False):
 
 def get_word2index(corpus, level='word', sep=None):
     """
-    词汇表：支持character和word-level，以及两者的汇总
-    统计corpus中character/word频率并倒序排序获得index，构建词汇字典：<character/word, index> 后续会使用index来表示character/word
-    其实也可不排序，直接随便赋给每个character/word一个index，只要保证唯一而固定即可~
+    词汇表：支持 character 和 word-level，以及两者的汇总
+    统计 corpus 中 character/word 频率并倒序排序获得 index，构建词汇字典：<character/word, index> 后续会使用 index 来表示 character/word
+    注意：其实也可不排序，直接随便赋给每个 character/word 一个 index，只要保证唯一且固定即可
+    比如按加入 Vocabulary 顺序依次赋值为1,2,3,...，0另有所用，比如当作 <PAD>、空格或 <UNK> 的 index
     """
     word2num = {}
     for line in corpus:
@@ -49,7 +65,7 @@ def get_word2index(corpus, level='word', sep=None):
 
 
 def get_word2vector(word2index=None, word_embedding=None):
-    """ 生成词汇表中的word及其vector，基于Original Full Embedding和词汇表word2index的结合 """
+    """ 生成词汇表中的 word 及其 vector，基于 Original Full Embedding 和词汇表 word2index 的结合 """
     word2vector = {}
     emb_dim = len(word_embedding.get('a'))
     for word in word2index:
@@ -73,7 +89,7 @@ def get_basic4_dict(corpus, level='word', sep=None, word_embedding):
 
 
 def dict_to_2arrays(dic, sortby=None):
-    """ 把字典的keys和values转化为2个ndarray  sortby: 按key(=0)或value(=1)排序 """
+    """ 把字典的 keys 和 values 转化为2个 ndarray  sortby: 按key(=0)或value(=1)排序 """
     if sortby is None:
         items = dic.items()
     else:
@@ -83,7 +99,7 @@ def dict_to_2arrays(dic, sortby=None):
 
 
 def array_to_dict(index2key, array):
-    """ 把array中的vector按其index转化为dict，key为index2key中index对应的key，value为vector """
+    """ 把 array 中的 vector 按其 index 转化为 dict，key 为 index2key 中 index 对应的 key，value 为 vector """
     return {index2key.get(ind): vector for (ind, vector) in enumerate(array)}
 
 
@@ -99,7 +115,7 @@ def similarity_cos(vec1, vec2):
 
 
 def get_similar_words(word0, word2vector, sim_func=similarity_cos, thresh=0.7):
-    """ 从word2vector中找到与word0相似度大于thresh的其他word，按相似度排序，相似度计算函数可指定 """
+    """ 从 word2vector 中找到与 word0 相似度大于 thresh 的其他 word，按相似度排序，相似度计算函数可指定 """
     vector0 = word2vector[word0]
     res = []
     for word, vector in word2vector.items():
@@ -119,7 +135,7 @@ def dict_persist(dic, filename, seps=['\t', ',']):
 
 
 def seq_to_vector(seq, vocabulary, max_token_len, char_flag=False):
-    """基于词汇表vocabulary，把seq转化为向量"""
+    """基于词汇表 vocabulary，把 seq 转化为向量"""
     if isinstance(seq, str) or isinstance(seq, int) or isinstance(seq, float):
 		tokens = list(str(seq)) if char_flag else str(seq).split()
     seq_vec = [vocabulary.get(token, 0) for token in tokens] 	# tokens中的各个token转化为对应的各个index
@@ -130,5 +146,7 @@ def seq_to_vector(seq, vocabulary, max_token_len, char_flag=False):
 
 if __name__ == '__main__':
     
-    pass
+    # 使用 gensim 生成 word2vec
+    sentences = CorpusGenerator('xxx.txt', stop_word_set)
+    model = Word2Vec(sentences, sg=1, size=100, compute_loss=True, window=5, workers=8, iter=8, min_count=2)
 
