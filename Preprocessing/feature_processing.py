@@ -13,36 +13,39 @@ from sklearn.decomposition import TruncatedSVD
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import MultiLabelBinarizer, LabelEncoder
 
-from keras.utils import to_categorical
+
+# 1. TFIDF特征
+# 省略，请参考LSA特征中lsa_vectorizer_2steps中的TFIDF转换，data_tfidf即为TFIDF特征
 
 
-# 1. LSA转换 = TFIDF转换 + SVD转换
+# 2. LSA特征
+# LSA转换 = TFIDF转换 + SVD转换
 # In particular, truncated SVD works on term count/tf-idf matrices as returned by the vectorizers in sklearn.feature_extraction.text. 
 # In that context, it is known as latent semantic analysis (LSA).
 
 # TODO **kawgs 实现
 def lsa_vectorizer(data, ngram_range=(1, 1), stopwords=None, max_features=None, n_components=2, n_iter=5, **kawgs):
     """
-    基于数据 data 训练 LSA 模型，以便后续生成 LSA 特征   LSA = TFIDF + SVD
+    基于数据data训练LSA模型，并生成LSA特征   LSA = TFIDF + SVD
     ARGS
-        data: iterable of sentence, sentence 是空格分隔的分字/分词字符串
-            形如：[['小猫咪', '爱', '吃肉'], ['我', '有', '一只', '小猫咪'], ...]  假设shape为 (9, )
+        data: iterable of sentence, sentence是空格分隔的分字/分词字符串
+            形如 ['小猫咪 爱 吃肉', '我 有 一只 小猫咪', ...]  假设shape为(9, ) (即9个sentence)
         其他：参数及其默认值与 TfidfVectorizer 和 TruncatedSVD 保持一致
     RETURNs
-        lsa: 训练好的 LSA 模型
-        feature: LSA 模型应用于 data 得到的 LSA 特征
+        lsa: 训练好的LSA模型
+        feature: LSA模型应用于data得到的LSA特征
     USAGE  
-        训练时，data 既可以只是 train 不包含 val/test，也可以是 train+val+test，应用时分别应用于 train/val/test
+        训练时，data既可以只是train，也可以是train+val+test，应用时分别应用于train/val/test
     """
     tfidf = TfidfVectorizer(ngram_range=ngram_range, stop_words=stopwords, sublinear_tf=True, max_features=max_features)  # (9, ) -> (9, max_features)
-    svd = TruncatedSVD(n_components=n_components, n_iter=n_iter, random_state=2019)                           # (9, max_features) -> (9, n_components)
+    svd = TruncatedSVD(n_components=n_components, n_iter=n_iter, random_state=2019)                                       #       -> (9, n_components)
     lsa = make_pipeline(tfidf, svd)
     feature = lsa.fit_transform(data)
     return lsa, feature
 
 
 def lsa_vectorizer_2steps(data, ngram_range=(1, 1), stopwords=None, max_features=None, n_components=2, n_iter=5, **kawgs):
-    """功能同 lsa_vectorizer, 假设 data 维度为(9, )"""
+    """功能同 lsa_vectorizer, 可返回TFIDF和SVD转换器，假设 data 维度为(9, )"""
     # TFIDF 转换
     tfidf = TfidfVectorizer(ngram_range=ngram_range, stop_words=stopwords, sublinear_tf=True, max_features=max_features)
     data_tfidf = tfidf.fit_transform(data)      # .toarray()  (9, max_features)
@@ -52,14 +55,14 @@ def lsa_vectorizer_2steps(data, ngram_range=(1, 1), stopwords=None, max_features
     return tfidf, svd, feature
 
 
-# 2. LDA特征
+# 3. LDA特征
 
 
 
-# 3. LSI特征
+# 4. LSI特征
 
 
-# 4. 基于卡方统计量，进行特征选择
+# 5. 基于卡方统计量，进行特征选择
 
 def occurrence_matrix(texts, categories):
     """
