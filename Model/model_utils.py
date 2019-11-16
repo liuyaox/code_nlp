@@ -27,7 +27,7 @@ def ypred_eval(ytrues, ypreds, detail=False):
 
 
 def model_eval(model, test_x, test_y, y_thresh=0.5):
-	""" Ä£ÐÍÆÀ¹À   Metrics: Accuracy, Precision, Recall, F1 Score"""
+	"""Metrics: Accuracy, Precision, Recall, F1 Score"""
 	ypreds = [int(x[0] > y_thresh) for x in model.predict(test_x)]
 	accuracy, precision, recall, f1, TP, FP, TN, FN = ypred_eval(test_y, ypreds, detail=True)
 	print(f'TP: {TP}  FP: {FP}  TN: {TN}  FN: {FN}')
