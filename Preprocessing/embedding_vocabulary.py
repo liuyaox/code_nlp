@@ -17,9 +17,7 @@ from gensim.models import Word2Vec
 # -----------------------------------------------------------------
 # 2. 从文件中获得预训练的Word Embedding，并结合word2idx，计算word2vector和idx2vector
 
-
 # TODO 把Embedding与Vocabulary分开为2个文件！
-
 
 def get_word2vector_idx2vector(word2idx=None, word_embedding=None, word_emb_spare=None):
     """ 生成词汇表中的 word, idx 及其 vector，基于 Original Full Embedding (或自己训练的Word Embedding)和词汇表 word2idx 的结合 """
@@ -40,6 +38,10 @@ def get_word2vector_idx2vector(word2idx=None, word_embedding=None, word_emb_spar
             word2vector[word] = vector
             idx2vector[idx] = vector
     return word2vector, idx2vector
+
+
+# (char, bichar) * (Word2Vec, GloVe, fastText) + <char, ELMo>
+# 训练方法参考：<https://github.com/liuyaox/forked_repos_with_notes/tree/master/datagrand-master/EmbeddingPretrain.py>
 
 
 # -------------------------------------------------------------
